@@ -1,4 +1,5 @@
 import requests
+import numpy as np
 from bs4 import BeautifulSoup
 
 def grabSCGDeck(scgUrl):
@@ -8,20 +9,19 @@ def grabSCGDeck(scgUrl):
     name = deck.find_all("header", class_="deck_title")[0].a.text
     player = deck.find("header", class_="player_name").a.text
     place = deck.find("header", class_="deck_played_placed").text
+
     mainboard = []
     for mbList in deck.find("div", class_="deck_card_wrapper").find_all("ul")[:-1]:
-        for li in mbList:
-            print(li.text)
-            print(type(li))
-            # mainboard.append(li)
-        # prin
-        # mainboard.append((int(li[0].text), li[1:]))
-
-    # print(deck.prettify())
-    print(name)
-    print(player)
-    print(place)
-    print(mainboard)
+        for item in mbList.find_all("li"):
+            mainboard.append([int(item.text[0]), item.text[2:]])
+    
+    sideboard = []
+    for sbItem in deck.find("div", class_="deck_sideboard").find_all("li"):
+        sideboard.append([int(sbItem.text[0]), sbItem.text[2:]])
+    
+    assert sum([card[0] for card in mainboard]) >= 60 and sum(card[0] for card in sideboard) <= 15
+    
+    return (deck, name, player, place, mainboard, sideboard)
     
 grabSCGDeck("http://sales.starcitygames.com//deckdatabase/displaydeck.php?DeckID=97570")
 
